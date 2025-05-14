@@ -5,62 +5,40 @@
 
 
 const createRequest = (options = {}) => {
-  const {
+  let {
     method = 'GET',
-    url = 'https://example.com',
+    url = '',
     data = {},
     callback = () => {}
   } = options;
 
-   function errorXhr () {
-      xhr.onerror = function () {
-      callback(new Error('Ошибка запроса'), null); // Ошибка сети
-    };
-   }
 
   const xhr = new XMLHttpRequest();
+  let formData = null;
 
   if(method === "GET") {
    const params = new URLSearchParams(data).toString()
 
    if(params){
       url += '?' + params
-   }
+   } } else {
 
-   xhr.open("GET", url)
-   xhr.responseType = "json"
-
-   xhr.onload = function() {
-      if (xhr.status >= 200 && xhr.status < 300) {
-         callback(null, xhr.response);
-      }  else {
-          callback(new Error(`Ошибка: ${xhr.status}`), null)
-      }
-   }
-
-    errorXhr()
-
-   xhr.send();
-  } else {
-   const formData = new FormData()
-
+   formData = new FormData()
       for (let key in data) {
       formData.append(key, data[key]);
     }
-
-    xhr.open(method, url);
-    xhr.responseType = 'json'; // формат, в котором необходимо выдать результат
-
-    xhr.onload = function() {
-      if(xhr.status >= 200 && xhr.status < 300) {
-         callback(null, xhr.response)
-      } else {
-         callback(new Error(`Ошибка: ${xhr.status}`), null)
-      }
-    }
-
-    errorXhr()
-
-    xhr.send(formData)
   }
+  
+   xhr.open(method, url)
+   xhr.responseType = "json"
+
+   xhr.onload = function() {
+      callback(null, xhr.response);
+   }
+
+    xhr.onerror = function () {
+      callback(new Error('Ошибка запроса'), null); // Ошибка сети
+    };
+    
+   xhr.send(formData);
 };
